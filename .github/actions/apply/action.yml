@@ -1,0 +1,36 @@
+name: Apply
+description: Apply cdktf stack
+inputs:
+  ACCOUNT_ID:
+    description: AWS Account Id
+    required: true
+  ACCOUNT_ALIAS:
+    description: AWS Account Alias
+    required: true
+  BACKEND_S3_BUCKET:
+    description: S3 bucket used for tf state
+    required: true
+  GHA_ROLE_TO_ASSUME:
+    description: AWS Role to Assume from GHA
+    required: true
+  TERRAFORM_ROLE:
+    description: Role to use for terraform plan
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/setup-tf
+      with:
+        GHA_ROLE_TO_ASSUME: ${{ inputs.GHA_ROLE_TO_ASSUME }}
+    # TODO do not ignore bash errors here
+    - run: |
+        set +e
+        yarn workspace cdktf-iac apply
+      shell: bash
+      env:
+        NODE_ENV: 'cicd'
+        ACCOUNT_ID: ${{ inputs.ACCOUNT_ID }}
+        ACCOUNT_ALIAS: ${{ inputs.ACCOUNT_ALIAS }}
+        BACKEND_S3_BUCKET: ${{ inputs.BACKEND_S3_BUCKET }}
+        TERRAFORM_ROLE: ${{ inputs.TERRAFORM_ROLE }}

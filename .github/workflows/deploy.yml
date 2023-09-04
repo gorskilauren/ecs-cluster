@@ -1,0 +1,38 @@
+name: Plan & Apply
+
+on: [push]
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/plan
+      with:
+        ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+        ACCOUNT_ALIAS: ${{ secrets.ACCOUNT_ALIAS }}
+        BACKEND_S3_BUCKET: ${{ secrets.BACKEND_S3_BUCKET }}
+        GHA_ROLE_TO_ASSUME: ${{ secrets.READ_ROLE_TO_ASSUME }}
+        TERRAFORM_ROLE: ${{ secrets.READ_TERRAFORM_ROLE }}
+  
+  apply:
+    environment: prod
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/apply
+      with:
+        ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+        ACCOUNT_ALIAS: ${{ secrets.ACCOUNT_ALIAS }}
+        BACKEND_S3_BUCKET: ${{ secrets.BACKEND_S3_BUCKET }}
+        GHA_ROLE_TO_ASSUME: ${{ secrets.WRITE_ROLE_TO_ASSUME }}
+        TERRAFORM_ROLE: ${{ secrets.WRITE_TERRAFORM_ROLE }}
+

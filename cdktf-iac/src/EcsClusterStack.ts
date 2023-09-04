@@ -2,11 +2,13 @@ import { Construct } from "constructs";
 import { S3Backend, TerraformStack } from "cdktf";
 import { Vpc } from '../.gen/modules/vpc';
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider";
+import { Config } from "../config";
 
 interface EcsClusterStackProps {
   accountId: string,
   accountAlias: string,
-  backendBucket: string
+  backendBucket: string,
+  config: Config
 }
 
 export class EcsClusterStack extends TerraformStack {
@@ -18,16 +20,16 @@ export class EcsClusterStack extends TerraformStack {
       key: id,
       region: 'us-west-2',
       encrypt: true,
-      profile: props.accountId
+      ...props.config.s3Backend
     });
     
     
     const resourceNames = this.createResourceNames(props.accountAlias)
     new AwsProvider(this, resourceNames.provider, {
-      profile: props.accountId,
       allowedAccountIds: [props.accountId],
       region: 'us-west-2',
-      alias: resourceNames.provider
+      alias: resourceNames.provider,
+      ...props.config.rootAwsProfile
     }); 
 
     const vpc = new Vpc(this, resourceNames.vpcModule, {
