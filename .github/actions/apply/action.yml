@@ -16,6 +16,9 @@ inputs:
   TERRAFORM_ROLE:
     description: Role to use for terraform plan
     required: true
+  EMAIL_TO_NOTIFY:
+    description: Email to send budget report to
+    required: true
 runs:
   using: "composite"
   steps:
@@ -25,8 +28,8 @@ runs:
         GHA_ROLE_TO_ASSUME: ${{ inputs.GHA_ROLE_TO_ASSUME }}
     # TODO do not ignore bash errors here
     - run: |
-        set +e
-        yarn workspace cdktf-iac apply
+        yarn workspace cdktf-iac apply BudgetsStack
+        yarn workspace cdktf-iac apply EcsClusterStack
       shell: bash
       env:
         NODE_ENV: 'cicd'
@@ -34,3 +37,4 @@ runs:
         ACCOUNT_ALIAS: ${{ inputs.ACCOUNT_ALIAS }}
         BACKEND_S3_BUCKET: ${{ inputs.BACKEND_S3_BUCKET }}
         TERRAFORM_ROLE: ${{ inputs.TERRAFORM_ROLE }}
+        EMAIL_TO_NOTIFY: ${{ inputs.EMAIL_TO_NOTIFY }}

@@ -3,6 +3,7 @@ import { App } from "cdktf";
 import { EcsClusterStack } from './EcsClusterStack';
 import { cicdConfig } from "../config/cicd";
 import { localConfig } from "../config/local";
+import { BudgetsStack } from "./BudgetsStack";
 
 let config;
 switch (`${process.env.NODE_ENV}`.toLowerCase()) {
@@ -17,6 +18,16 @@ switch (`${process.env.NODE_ENV}`.toLowerCase()) {
 }
 
 const app = new App();
+
+new BudgetsStack(app, "BudgetsStack",
+    {
+        accountId: `${process.env.ACCOUNT_ID}`,
+        accountAlias: `${process.env.ACCOUNT_ALIAS}`,
+        backendBucket: `${process.env.BACKEND_S3_BUCKET}`,
+        emailToNotify: `${process.env.EMAIL_TO_NOTIFY}`,
+        config
+    });
+
 new EcsClusterStack(app, "EcsClusterStack",
     {
         accountId: `${process.env.ACCOUNT_ID}`,
@@ -24,4 +35,5 @@ new EcsClusterStack(app, "EcsClusterStack",
         backendBucket: `${process.env.BACKEND_S3_BUCKET}`,
         config
     });
+
 app.synth();

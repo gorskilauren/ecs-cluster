@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   plan:
+    environment: nonprod
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -17,7 +18,8 @@ jobs:
         BACKEND_S3_BUCKET: ${{ secrets.BACKEND_S3_BUCKET }}
         GHA_ROLE_TO_ASSUME: ${{ secrets.READ_ROLE_TO_ASSUME }}
         TERRAFORM_ROLE: ${{ secrets.READ_TERRAFORM_ROLE }}
-  
+        EMAIL_TO_NOTIFY: ${{ secrets.EMAIL_TO_NOTIFY }}
+
   apply:
     environment: prod
     if: github.ref == 'refs/heads/main'
@@ -35,4 +37,5 @@ jobs:
         BACKEND_S3_BUCKET: ${{ secrets.BACKEND_S3_BUCKET }}
         GHA_ROLE_TO_ASSUME: ${{ secrets.WRITE_ROLE_TO_ASSUME }}
         TERRAFORM_ROLE: ${{ secrets.WRITE_TERRAFORM_ROLE }}
+        EMAIL_TO_NOTIFY: ${{ secrets.EMAIL_TO_NOTIFY }}
 
