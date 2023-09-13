@@ -1,6 +1,7 @@
 import { Construct } from "constructs";
 import { S3Backend, TerraformStack } from "cdktf";
 import { Vpc } from '../.gen/modules/vpc';
+import { Ecs } from '../.gen/modules/ecs';
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider";
 import { Config } from "../config";
 
@@ -42,11 +43,30 @@ export class EcsClusterStack extends TerraformStack {
       //TODO enable these to access internet from vpc (but not vica versa) - costs $$
     });
 
-    vpc.overrideLogicalId(resourceNames.vpcModule)
+    vpc.overrideLogicalId(resourceNames.vpcModule);
+
+    new Ecs(this, resourceNames.ecsCluster, {
+      clusterName: 'lgorski',
+      fargateCapacityProviders: {
+        fargate: {
+          defaultCapacityProviderStrategy: {
+            base: 20,
+            weight: 50
+          }
+        },
+        fargateSpot: {
+          defaultCapacityProviderStrategy: {
+            weight: 50
+          }  
+        }
+      }
+    });
+
   }
 
   private createResourceNames = (namePrefix: string) => ({
     vpcModule: `${namePrefix}_private_vpc`,
-    provider: `${namePrefix}_provider`
+    provider: `${namePrefix}_provider`,
+    ecsCluster: `${namePrefix}_ecs_cluster`
   });
 }
